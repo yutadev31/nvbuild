@@ -1,7 +1,7 @@
 name: Build Neovim
 
 on:
-  workflow_dispatch:
+  workflow_call:
     inputs:
       version:
         description: "Neovim version"
