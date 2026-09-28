@@ -8,9 +8,14 @@ on:
         required: true
         type: string
 
+permissions:
+  contents: write
+
 jobs:
   build-linux:
     runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
     steps:
       - name: Install build dependencies
         run: |
@@ -47,3 +52,11 @@ jobs:
         with:
           name: nvim-${{ inputs.version }}-linux-x86_64
           path: nvim-${{ inputs.version }}-linux-x86_64.tar.gz
+      - name: Create release
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          gh release create "$VERSION" \
+            "nvim-${VERSION}-linux-x86_64.tar.gz" \
+            --title "Neovim $VERSION" \
+            --notes "Unofficial Neovim build for Linux x86_64"
