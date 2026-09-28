@@ -11,7 +11,7 @@ jobs:
     env:
       GH_TOKEN: ${{ github.token }}
     outputs:
-      version: ${{ steps.check.outputs.version }}
+      version: ${{ steps.version.outputs.version }}
       released: ${{ steps.check.outputs.released }}
     steps:
       - name: Get latest Neovim release
