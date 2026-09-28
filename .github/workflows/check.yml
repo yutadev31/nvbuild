@@ -10,6 +10,9 @@ jobs:
     runs-on: ubuntu-latest
     env:
       GH_TOKEN: ${{ github.token }}
+    outputs:
+      version: ${{ steps.check.outputs.version }}
+      released: ${{ steps.check.outputs.released }}
     steps:
       - name: Get latest Neovim release
         id: version
@@ -28,12 +31,13 @@ jobs:
           version="${{ steps.version.outputs.version }}"
           
           if gh release view "$version" >/dev/null 2>&1; then
-            echo "exists=true" >> "$GITHUB_OUTPUT"
+            echo "released=true" >> "$GITHUB_OUTPUT"
           else
-            echo "exists=false" >> "$GITHUB_OUTPUT"
+            echo "released=false" >> "$GITHUB_OUTPUT"
           fi
-      - name: Something
-        if: steps.check.outputs.exists == 'false'
-        uses: yutadev31/nvbuild/.github/workflows/build.yml@main
-        with:
-          version: ${{ steps.version.outputs.version }}
+  build:
+    needs: check
+    if: needs.check.outputs.released == 'false'
+    uses: ./.github/workflows/build.yml
+    with:
+      version: ${{ needs.check.outputs.version }}
