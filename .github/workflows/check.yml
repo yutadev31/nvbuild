@@ -1,0 +1,39 @@
+name: Check Neovim release
+
+on:
+  schedule:
+    - cron: "0 0,12 * * *"
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Get latest Neovim release
+        id: version
+        run: |
+          version="$(
+            gh release view \
+              --repo neovim/neovim \
+              --json tagName \
+              --jq '.tagName'
+          )"
+
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+      - name: Check release
+        id: check
+        run: |
+          version="${{ steps.version.outputs.version }}"
+          
+          if gh release view "$version" >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Something
+        if: steps.check.outputs.exists == 'false'
+        uses: yutadev31/nvbuild/.github/workflows/build.yml@main
+        with:
+          version: ${{ steps.version.outputs.version }}

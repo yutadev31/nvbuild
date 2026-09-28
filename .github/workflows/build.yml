@@ -1,0 +1,49 @@
+name: Build Neovim
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Neovim version"
+        required: true
+        type: string
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            ninja-build \
+            gettext \
+            cmake \
+            curl \
+            build-essential
+      - name: Clone Neovim
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          git clone \
+            --branch "$VERSION" \
+            --depth 1 \
+            https://github.com/neovim/neovim.git
+      - name: Build Neovim
+        working-directory: neovim
+        run: |
+          make CMAKE_BUILD_TYPE=Release \
+            CMAKE_INSTALL_PREFIX="$GITHUB_WORKSPACE/output"
+          make install
+      - name: Create archive
+        env:
+          VERSION: ${{ inputs.version }}
+        run: |
+          mv output "nvim-${VERSION}-linux-x86_64"
+          tar -czf "nvim-${VERSION}-linux-x86_64.tar.gz" \
+            "nvim-${VERSION}-linux-x86_64"
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: nvim-${{ inputs.version }}-linux-x86_64
+          path: nvim-${{ inputs.version }}-linux-x86_64.tar.gz
