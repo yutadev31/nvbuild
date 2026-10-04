@@ -33,7 +33,9 @@ jobs:
         run: |
           version="${{ steps.version.outputs.version }}"
 
-          if gh release view "$version" >/dev/null 2>&1; then
+          if gh release view "$version" \
+            --repo "$GITHUB_REPOSITORY" \
+            >/dev/null 2>&1; then
             echo "released=true" >> "$GITHUB_OUTPUT"
           else
             echo "released=false" >> "$GITHUB_OUTPUT"

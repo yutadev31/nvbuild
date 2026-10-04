@@ -57,6 +57,7 @@ jobs:
           VERSION: ${{ inputs.version }}
         run: |
           gh release create "$VERSION" \
+            --repo "$GITHUB_REPOSITORY" \
             "nvim-${VERSION}-linux-x86_64.tar.gz" \
             --title "Neovim $VERSION" \
             --notes "Unofficial Neovim build for Linux x86_64"
